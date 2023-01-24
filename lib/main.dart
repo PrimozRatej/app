@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
+      // Test pipe
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: const Color(0xff21A1B3),
