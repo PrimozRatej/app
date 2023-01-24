@@ -92,7 +92,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_ACCOUNT_KEY }}
-          packageName: com.app.package_name
+          packageName: com.humhub.humhub.qa
           releaseFiles: app-release.aab
           track: alpha
           status: completed
