@@ -22,8 +22,6 @@ jobs:
         uses: gittools/actions/gitversion/execute@v0.9.7
       - name: Create version.txt with nuGetVersion
         run: echo ${{ steps.gitversion.outputs.nuGetVersion  }} > version.txt
-      - name: Save version will be used in build
-        run: echo "::set-env name=BUILD_NUMBER::${{ steps.gitversion.outputs.nuGetVersion  }}"
       - name: Upload version.txt
         uses: actions/upload-artifact@v2
         with:
@@ -66,8 +64,8 @@ jobs:
           channel: "beta"
       - run: flutter clean
       - run: flutter pub get
-      - run: flutter build apk --release --split-per-abi --build-number=${BUILD_NUMBER}
-      - run: flutter build appbundle --release --build-number=${BUILD_NUMBER}
+      - run: flutter build apk --release --split-per-abi --build-number=${ steps.gitversion.outputs.nuGetVersion }
+      - run: flutter build appbundle --release --build-number=${ steps.gitversion.outputs.nuGetVersion }
       - name: Create a Release in GitHub
         uses: ncipollo/release-action@v1
         with:
