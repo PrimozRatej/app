@@ -52,8 +52,8 @@ jobs:
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
           echo "keyAlias=upload" >> android/key.properties
           echo "storeFile=./keystore.jks" >> android/key.properties
-      - name: Convert base64 to binary
-        run: echo ${secrets.KEYSTORE_BASE64} | base64 --decode > android/app/keystore.jks
+      - name: Convert base64 to keystore.jks
+        run: echo -n "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
       - uses: actions/setup-java@v1
         with:
           java-version: "12.x"
