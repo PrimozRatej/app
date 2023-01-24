@@ -53,7 +53,7 @@ jobs:
           echo "keyAlias=upload" >> android/key.properties
           echo "storeFile=./keystore.jks" >> android/key.properties
       - name: Convert base64 to binary
-        run: echo ${secrets.KEYSTORE_BASE64} | base64 --decode > ./keystore.jks
+        run: echo ${secrets.KEYSTORE_BASE64} | base64 --decode > android/app/keystore.jks
       - uses: actions/setup-java@v1
         with:
           java-version: "12.x"
