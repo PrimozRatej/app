@@ -29,32 +29,7 @@ class WebViewAppState extends ConsumerState<WebViewApp> with WebViewMixin {
   Widget build(BuildContext context) {
     return SafeArea(
       child: WillPopScope(
-        onWillPop: () async {
-          bool canGoBack = await webViewController.canGoBack();
-          if (canGoBack) {
-            webViewController.goBack();
-            return Future.value(false);
-          } else {
-            final exitConfirmed = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Are you sure?'),
-                content: const Text('Do you want to exit an App'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('No'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Yes'),
-                  ),
-                ],
-              ),
-            );
-            return exitConfirmed ?? false;
-          }
-        },
+        onWillPop: () => webViewController.exitApp(context),
         child: Scaffold(
           key: scaffoldKey,
           body: WebViewWidget(

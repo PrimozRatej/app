@@ -14,6 +14,35 @@ extension MyCookies on WebViewCookieManager {
   }
 }
 
+extension MyWebViewController on WebViewController {
+  Future<bool> exitApp(BuildContext context) async {
+    bool canGoBack = await this.canGoBack();
+    if (canGoBack) {
+      goBack();
+      return Future.value(false);
+    } else {
+      final exitConfirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Are you sure?'),
+          content: const Text('Do you want to exit an App'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Yes'),
+            ),
+          ],
+        ),
+      );
+      return exitConfirmed ?? false;
+    }
+  }
+}
+
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
     hexColor = hexColor.toUpperCase().replaceAll("#", "");
