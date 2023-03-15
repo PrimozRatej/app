@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:humhub/util/manifest.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:humhub/models/manifest.dart';
+import 'package:humhub/pages/opener.dart';
+import 'package:humhub/util/providers.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
+// ignore_for_file: use_build_context_synchronously
 extension MyCookies on WebViewCookieManager {
   Future<void> setMyCookies(Manifest manifest) async {
     await setCookie(
@@ -14,8 +19,8 @@ extension MyCookies on WebViewCookieManager {
   }
 }
 
-extension MyWebViewController on WebViewController {
-  Future<bool> exitApp(BuildContext context) async {
+extension MyWebViewController on InAppWebViewController {
+  Future<bool> exitApp(BuildContext context, ref) async {
     bool canGoBack = await this.canGoBack();
     if (canGoBack) {
       goBack();
@@ -32,7 +37,9 @@ extension MyWebViewController on WebViewController {
               child: const Text('No'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () {
+                closeOrOpenDialog(context, ref);
+              },
               child: const Text('Yes'),
             ),
           ],
@@ -40,6 +47,14 @@ extension MyWebViewController on WebViewController {
       );
       return exitConfirmed ?? false;
     }
+  }
+
+  closeOrOpenDialog(BuildContext context, WidgetRef ref) {
+    var isHide = ref.read(humHubProvider).isHideDialog;
+    isHide
+        ? SystemNavigator.pop()
+        : Navigator.of(context).pushNamedAndRemoveUntil(
+            Opener.path, (Route<dynamic> route) => false);
   }
 }
 
@@ -54,3 +69,22 @@ class HexColor extends Color {
 
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }
+
+extension AsyncValueX<T> on AsyncValue<T> {
+  bool get isLoading => asData == null;
+
+  bool get isLoaded => asData != null;
+
+  bool get isError => this is AsyncError;
+
+  AsyncError get asError => this as AsyncError;
+
+  T? get valueOrNull => asData?.value;
+}
+
+extension FutureAsyncValueX<T> on Future<AsyncValue<T>> {
+  Future<T?> get valueOrNull => then(
+        (asyncValue) => asyncValue.asData?.value,
+  );
+}
+

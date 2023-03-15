@@ -1,5 +1,5 @@
 name: humhub
-description: HumHub App
+description: HumHub Mobile app
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -41,6 +41,19 @@ dependencies:
   http: ^0.13.5
   flutter_riverpod: ^2.1.3
   permission_handler: ^10.2.0
+  flutter_secure_storage: ^7.0.1
+  flutter_inappwebview: ^5.7.2+3
+  receive_sharing_intent: ^1.4.5
+  package_info_plus: ^3.0.3
+  uni_links: ^0.5.1
+  firebase_messaging: ^14.2.4
+  firebase_core: ^2.6.1
+  timezone: ^0.9.1
+  flutter_native_timezone: ^2.0.0
+  flutter_local_notifications: ^13.0.0
+  loggy: ^2.0.3
+  app_settings: ^4.2.0
+  flutter_app_badger: ^1.5.0
 
 dev_dependencies:
   flutter_test:
