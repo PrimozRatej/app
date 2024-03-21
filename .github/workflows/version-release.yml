@@ -102,27 +102,27 @@ jobs:
           name: appbundle
           path: build/app/outputs/bundle/release/app-release.aab
 
-  release_android:
-    name: Release APK to Google Play
-    needs: [build_android]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Get appbundle from artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: appbundle
-      - name: Release app to internal track
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_ACCOUNT_KEY }}
-          packageName: com.humhub.app
-          releaseFiles: app-release.aab
-          track: internal
-          status: completed
+#  release_android:
+#    name: Release APK to Google Play
+#    needs: [build_android]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#      - name: Get appbundle from artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: appbundle
+#      - name: Release app to internal track
+#        uses: r0adkll/upload-google-play@v1
+#        with:
+#          serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_ACCOUNT_KEY }}
+#          packageName: com.humhub.app
+#          releaseFiles: app-release.aab
+#          track: internal
+#          status: completed
 
   build_ios:
     name: Build IPA
@@ -213,24 +213,24 @@ jobs:
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
           rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
-  release_ios:
-    name: Release IPA to TestFlight
-    needs: [ build_ios ]
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Get IPA from artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: releaseipa
-          path: build/ios/ipa
-      - name: Upload app to TestFlight
-        uses: apple-actions/upload-testflight-build@v1
-        with:
-          app-path: build/ios/ipa/humhub.ipa
-          issuer-id: ${{ secrets.APPSTORE_APP_API_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_APP_API_PRIVATE_KEY }}
+#  release_ios:
+#    name: Release IPA to TestFlight
+#    needs: [ build_ios ]
+#    runs-on: macos-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#      - name: Get IPA from artifacts
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: releaseipa
+#          path: build/ios/ipa
+#      - name: Upload app to TestFlight
+#        uses: apple-actions/upload-testflight-build@v1
+#        with:
+#          app-path: build/ios/ipa/humhub.ipa
+#          issuer-id: ${{ secrets.APPSTORE_APP_API_ISSUER_ID }}
+#          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+#          api-private-key: ${{ secrets.APPSTORE_APP_API_PRIVATE_KEY }}
