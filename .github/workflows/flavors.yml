@@ -10,12 +10,6 @@ jobs:
     strategy:
       matrix:
         target: [opener, humhubCommunity, somedemoproject12345]
-    name: Flavor Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Trigger version-release workflow
-        run: ./.github/workflows/version-release.yml  # Run the workflow after fetching the repository
-        with:
-          target: ${{ matrix.target }}
+    uses: PrimozRatej/app/.github/workflows/deployment.yml@f-flavored-sdp-forked
+    with:
+      target: ${{ matrix.target }}
