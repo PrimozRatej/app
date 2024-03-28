@@ -1,4 +1,4 @@
-name: version-release
+name: flavored
 
 on:
   push:
