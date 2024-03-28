@@ -1,12 +1,8 @@
-name: version-release
-
 on:
-  workflow_call:
-    inputs:
-      flavor:
-        description: 'A flavor name passed from the caller workflow'
-        required: true
-        type: string
+  push:
+    tags:
+      - "v*"
+
 jobs:
   version:
     name: Create version number
@@ -33,6 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    strategy:
+      matrix:
+        flavor:
+          - flavor1
+          - flavor2
+          - flavor3
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -85,6 +87,7 @@ jobs:
           gradlePath: android/app/build.gradle # or app/build.gradle.kts
           versionCode: ${{ env.version_code }}
           versionName: ${{ env.version }}
+          flavor: ${{ matrix.flavor }}
       - run: flutter clean
       - run: flutter pub get
       - run: flutter test
