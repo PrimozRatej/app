@@ -10,6 +10,6 @@ jobs:
     strategy:
       matrix:
         target: [opener, humhubCommunity, somedemoproject12345]
-    uses: PrimozRatej/app/.github/workflows/deployment.yml@f-flavored-sdp-forked
+    uses: PrimozRatej/app/.github/workflows/version-release.yml@f-flavored-sdp-forked
     with:
       target: ${{ matrix.target }}
