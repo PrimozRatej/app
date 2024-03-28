@@ -10,6 +10,8 @@ jobs:
     strategy:
       matrix:
         target: [opener, humhubCommunity, somedemoproject12345]
+    permissions:
+      contents: read-write
     uses: PrimozRatej/app/.github/workflows/version-release.yml@f-flavored-sdp-forked
     with:
       flavor: ${{ matrix.target }}
