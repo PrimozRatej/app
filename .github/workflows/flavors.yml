@@ -13,7 +13,9 @@ jobs:
     name: Flavor Release
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Trigger version-release workflow
-        uses: ./.github/workflows/version-release.yml
+        run: ./.github/workflows/version-release.yml  # Run the workflow after fetching the repository
         with:
           target: ${{ matrix.target }}
