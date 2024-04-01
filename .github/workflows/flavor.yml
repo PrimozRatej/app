@@ -6,12 +6,23 @@ on:
       - "v*"
 
 jobs:
-  flavor_release:
+  create_version_number:
     strategy:
       matrix:
         target: [opener, humhubCommunity, somedemoproject12345]
     permissions:
       contents: write
-    uses: PrimozRatej/app/.github/workflows/version-release.yml@f-flavored-sdp-forked
+    uses: PrimozRatej/app/.github/workflows/create-version-number.yml@f-flavored-sdp-forked
+    with:
+      flavor: ${{ matrix.target }}
+
+  build_android:
+    needs: [create_version_number]
+    strategy:
+      matrix:
+        target: [ opener, humhubCommunity, somedemoproject12345 ]
+    permissions:
+      contents: write
+    uses: PrimozRatej/app/.github/workflows/build-android.yml@f-flavored-sdp-forked
     with:
       flavor: ${{ matrix.target }}
