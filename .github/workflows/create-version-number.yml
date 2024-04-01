@@ -1,0 +1,28 @@
+name: create-version-number
+
+on:
+  workflow_call:
+    inputs:
+      flavor:
+        description: 'A flavor name passed from the caller workflow'
+        required: true
+        type: string
+jobs:
+  version:
+    name: Create version number
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Extract version from tag name
+        id: extract_version
+        run: echo "version=$(echo ${{ github.ref }} | sed -e 's/^v//' -e 's/-.*//')" >> $GITHUB_ENV
+      - name: Write version to file
+        run: echo $version > version.txt
+      - name: Upload version.txt
+        uses: actions/upload-artifact@v3
+        with:
+          name: gitversion
+          path: version.txt
