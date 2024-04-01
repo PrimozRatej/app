@@ -38,6 +38,14 @@ jobs:
       matrix:
         flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
+      - name: Check if secret exists
+        run: |
+          if [[ -n "${{ secrets.MY_SECRET }}" ]]; then
+            echo "Secret exists."
+            echo ${{ secrets.MY_SECRET }}
+          else
+            echo "Secret does not exist."
+          fi
       - name: Checkout
         uses: actions/checkout@v3
         with:
