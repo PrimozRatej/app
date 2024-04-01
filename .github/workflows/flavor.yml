@@ -12,17 +12,10 @@ jobs:
         target: [opener, humhubCommunity, somedemoproject12345]
     permissions:
       contents: write
-    uses: PrimozRatej/app/.github/workflows/create-version-number.yml@f-flavored-sdp-forked
-    with:
-      flavor: ${{ matrix.target }}
-
-  build_android:
-    needs: [create_version_number]
-    strategy:
-      matrix:
-        target: [ opener, humhubCommunity, somedemoproject12345 ]
-    permissions:
-      contents: write
-    uses: PrimozRatej/app/.github/workflows/build-android.yml@f-flavored-sdp-forked
+    steps:
+    - name: Create version number
+      uses: PrimozRatej/app/.github/workflows/create-version-number.yml@f-flavored-sdp-forked
+    - name: Build android
+      uses: PrimozRatej/app/.github/workflows/build-android.yml@f-flavored-sdp-forked
     with:
       flavor: ${{ matrix.target }}
