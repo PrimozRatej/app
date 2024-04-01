@@ -32,6 +32,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
@@ -134,6 +135,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
