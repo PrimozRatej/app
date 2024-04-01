@@ -28,6 +28,7 @@ jobs:
   build_android:
     name: Build APK
     needs: [version]
+    environment: ${{ matrix.flavor }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
