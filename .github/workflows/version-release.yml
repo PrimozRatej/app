@@ -32,6 +32,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
@@ -110,6 +111,7 @@ jobs:
     needs: [build_android]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
@@ -137,6 +139,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
@@ -227,6 +230,7 @@ jobs:
     needs: [ build_ios ]
     runs-on: macos-latest
     strategy:
+      fail-fast: false
       matrix:
         flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
