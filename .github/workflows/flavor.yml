@@ -1,0 +1,15 @@
+name: flavored
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  flavor_release:
+    strategy:
+      matrix:
+        target: [opener, humhubCommunity, somedemoproject12345]
+    uses: PrimozRatej/app/.github/workflows/version-release.yml@f-flavored-sdp-forked
+    with:
+      flavor: ${{ matrix.target }}
