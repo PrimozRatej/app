@@ -29,6 +29,7 @@ jobs:
         run: |
           # Copy all folders and files from repo1 to repo2
           rsync -av --exclude='.git' --exclude='.github' ./repo1/ ./repo2/
+          cat ./repo2/README.md
 
       - name: Check for Conflicts
         run: |
