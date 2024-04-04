@@ -24,7 +24,7 @@ jobs:
           ref: main
           path: repo2
         env:
-          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using again
+          PAT: ${{ secrets.REPO2_TOKEN }}  # Using again
 
       - name: Copy Files to Repo2
         run: |
@@ -44,4 +44,4 @@ jobs:
             git push -u origin feature-branch-$GITHUB_RUN_NUMBER
           }
         env:
-          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
+          PAT: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
