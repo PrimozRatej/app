@@ -23,8 +23,9 @@ jobs:
           repository: PrimozRatej/app-flavored
           ref: main
           path: repo2
+          token: ${{ secrets.REPO2_TOKEN }}  # Using again
         env:
-          PAT: ${{ secrets.REPO2_TOKEN }}  # Using again
+          token: ${{ secrets.REPO2_TOKEN }}  # Using again
 
       - name: Copy Files to Repo2
         run: |
@@ -44,4 +45,4 @@ jobs:
             git push -u origin feature-branch-$GITHUB_RUN_NUMBER
           }
         env:
-          PAT: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
+          token: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
