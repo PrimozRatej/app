@@ -1,0 +1,45 @@
+name: Sync Repo1 with Repo2
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo1
+        uses: actions/checkout@v2
+        with:
+          repository: PrimozRatej/app
+          path: repo1
+
+      - name: Checkout Repo2
+        uses: actions/checkout@v2
+        with:
+          repository: PrimozRatej/app-flavored
+          path: repo2
+        env:
+          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
+
+      - name: Copy Files to Repo2
+        run: |
+          # Copy all folders and files from repo1 to repo2
+          rsync -av --exclude='.git' --exclude='.github' ./repo1/ ./repo2/
+
+      - name: Commit and Push to Repo2
+        run: |
+          cd ./repo2
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "Sync from repo1"
+          git push origin master || { 
+            git checkout -b feature-branch-$GITHUB_RUN_NUMBER
+            git commit -m "Conflicting changes - resolve manually"
+            git push -u origin feature-branch-$GITHUB_RUN_NUMBER
+          }
+        env:
+          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
