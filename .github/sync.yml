@@ -1,4 +1,4 @@
-group:
-  repos: |
-    PrimozRatej/app
-    PrimozRatej/app-flavored
+PrimozRatej/app:
+  - README.md
+PrimozRatej/app-flavored:
+  - README.md
