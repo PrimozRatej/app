@@ -39,7 +39,7 @@ jobs:
           git config user.name "GitHub Actions"
           git add .
           git commit -m "Sync from repo1"
-          git push origin master || { 
+          git push origin main || { 
             git checkout -b feature-branch-$GITHUB_RUN_NUMBER
             git commit -m "Conflicting changes - resolve manually"
             git push -u origin feature-branch-$GITHUB_RUN_NUMBER
