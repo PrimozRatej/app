@@ -14,12 +14,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: PrimozRatej/app
+          ref: main
           path: repo1
 
       - name: Checkout Repo2
         uses: actions/checkout@v2
         with:
           repository: PrimozRatej/app-flavored
+          ref: main
           path: repo2
         env:
           REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using
