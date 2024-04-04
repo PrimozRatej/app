@@ -1,12 +1,1 @@
-# HumHub Mobile App
-
-In Conflict in
-
-
-Test
-
-
-Test
-
-
-12345
+# HumHub Mobile App with conflict
