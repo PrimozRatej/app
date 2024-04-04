@@ -40,7 +40,7 @@ jobs:
           git diff --name-only --diff-filter=U | wc -l > conflict_count
         continue-on-error: true
 
-      - name: Commit and Push to Repo2
+      - name: Commit and Push to app-flavored
         run: |
           cd ./repo2
           CONFLICT_COUNT=$(<conflict_count)
