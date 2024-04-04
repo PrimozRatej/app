@@ -22,7 +22,7 @@ jobs:
           repository: PrimozRatej/app-flavored
           path: repo2
         env:
-          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
+          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using
 
       - name: Copy Files to Repo2
         run: |
