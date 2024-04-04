@@ -1,0 +1,8 @@
+group:
+  # first group
+  - files:
+      - source: README.md
+        dest: README.md
+    repos: |
+      PrimozRatej/app
+      PrimozRatej/app-flavored
