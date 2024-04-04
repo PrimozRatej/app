@@ -23,26 +23,35 @@ jobs:
           repository: PrimozRatej/app-flavored
           ref: main
           path: repo2
-          token: ${{ secrets.REPO2_TOKEN }}  # Using again
-        env:
-          token: ${{ secrets.REPO2_TOKEN }}  # Using again
+          token: ${{ secrets.REPO2_TOKEN }}
 
       - name: Copy Files to Repo2
         run: |
           # Copy all folders and files from repo1 to repo2
           rsync -av --exclude='.git' --exclude='.github' ./repo1/ ./repo2/
 
+      - name: Check for Conflicts
+        run: |
+          cd ./repo2
+          git checkout main
+          git pull origin main
+          git checkout -b temp-branch
+          git merge origin/main --no-commit --no-ff
+          git diff --name-only --diff-filter=U | wc -l > conflict_count
+        continue-on-error: true
+
       - name: Commit and Push to Repo2
         run: |
           cd ./repo2
-          git config user.email "github-actions@github.com"
-          git config user.name "GitHub Actions"
-          git add .
-          git commit -m "Sync from repo1"
-          git push origin main || { 
-            git checkout -b feature-branch-$GITHUB_RUN_NUMBER
-            git commit -m "Conflicting changes - resolve manually"
-            git push -u origin feature-branch-$GITHUB_RUN_NUMBER
-          }
-        env:
-          token: ${{ secrets.REPO2_TOKEN }}  # Using the secret as an environment variable
+          CONFLICT_COUNT=$(<conflict_count)
+          if [ "$CONFLICT_COUNT" -eq "0" ]; then
+            git config user.email "github-actions@github.com"
+            git config user.name "GitHub Actions"
+            git add .
+            git commit -m "Sync from repo1"
+            git push origin main
+          else
+            git checkout main
+            git branch -D temp-branch
+            echo "Conflicts detected. Not pushing changes."
+          fi
