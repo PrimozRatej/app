@@ -24,7 +24,7 @@ jobs:
           ref: main
           path: repo2
         env:
-          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using
+          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}  # Using again
 
       - name: Copy Files to Repo2
         run: |
