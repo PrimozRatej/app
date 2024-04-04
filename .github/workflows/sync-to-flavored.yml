@@ -15,6 +15,7 @@ jobs:
         with:
           repository: PrimozRatej/app
           path: repo1
+          ref: master
           fetch-depth: 0
 
       - name: Checkout Repo2
