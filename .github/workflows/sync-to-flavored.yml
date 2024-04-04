@@ -4,57 +4,14 @@ on:
   push:
     branches:
       - '*'
-
 jobs:
   sync:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repo1
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@master
+      - name: Run GitHub File Sync
+        uses: BetaHuhn/repo-file-sync-action@v1
         with:
-          repository: PrimozRatej/app
-          path: repo1
-          ref: master
-          fetch-depth: 0
+          GH_PAT: ${{ secrets.REPO2_TOKEN }}
 
-      - name: Checkout Repo2
-        uses: actions/checkout@v4
-        with:
-          repository: PrimozRatej/app-flavored
-          path: repo2
-          fetch-depth: 0
-          token: ${{ secrets.REPO2_TOKEN }}
-
-      - name: Copy Files to Repo2
-        run: |
-          # Copy all folders and files from repo1 to repo2
-          rsync -av --exclude='.git' --exclude='.github' ./repo1/ ./repo2/
-          cat ./repo2/README.md
-
-      - name: Check for Conflicts
-        run: |
-          cd ./repo2
-          git checkout main
-          git pull origin main
-          git checkout -b temp-branch
-          git merge origin/main --no-commit --no-ff
-          git diff --name-only --diff-filter=U | wc -l > conflict_count
-        continue-on-error: true
-
-      - name: Commit and Push to app-flavored
-        run: |
-          cd ./repo2
-          CONFLICT_COUNT=$(<conflict_count)
-          if [ "$CONFLICT_COUNT" -eq "0" ]; then
-            git config user.email "github-actions@github.com"
-            git config user.name "GitHub Actions"
-            git add .
-            git commit -m "Sync from repo1"
-            git push origin main
-            echo "No conflicts detected . ⬆️Pushing changes.⬆️"
-          else
-            git checkout main
-            git branch -D temp-branch
-            echo "Conflicts detected. Not pushing changes."
-          fi
