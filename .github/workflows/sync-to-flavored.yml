@@ -50,7 +50,7 @@ jobs:
             git add .
             git commit -m "Sync from repo1"
             git push origin main
-            echo "No conflicts detected. ⬆️Pushing changes.⬆️"
+            echo "No conflicts detected.⬆️Pushing changes.⬆️"
           else
             git checkout main
             git branch -D temp-branch
