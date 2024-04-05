@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:app_settings/app_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
@@ -12,17 +11,16 @@ import 'package:humhub/models/channel_message.dart';
 import 'package:humhub/models/hum_hub.dart';
 import 'package:humhub/models/manifest.dart';
 import 'package:humhub/pages/opener.dart';
-import 'package:humhub/util/connectivity_plugin.dart';
 import 'package:humhub/util/extensions.dart';
 import 'package:humhub/util/notifications/channel.dart';
+import 'package:humhub/util/notifications/plugin.dart';
 import 'package:humhub/util/providers.dart';
-import 'package:humhub/util/universal_opener_controller.dart';
-import 'package:humhub/util/router.dart';
+import 'package:humhub/util/show_dialog.dart';
+import 'package:humhub/util/opener_controllers/universal_opener_controller.dart';
 import 'package:loggy/loggy.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:humhub/util/router.dart' as m;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WebViewGlobalController {
   static InAppWebViewController? _value;
@@ -60,7 +58,6 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
   );
 
   PullToRefreshController? _pullToRefreshController;
-  late PullToRefreshOptions _pullToRefreshOptions;
   HeadlessInAppWebView? headlessWebView;
 
   @override
@@ -71,7 +68,22 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
   @override
   Widget build(BuildContext context) {
     _initialRequest = _initRequest;
-    _pullToRefreshController = initPullToRefreshController;
+    _pullToRefreshController = PullToRefreshController(
+      options: PullToRefreshOptions(
+        color: HexColor(manifest.themeColor),
+      ),
+      onRefresh: () async {
+        Uri? url = await WebViewGlobalController.value!.getUrl();
+        if (url != null) {
+          WebViewGlobalController.value!.loadUrl(
+            urlRequest: URLRequest(
+                url: await WebViewGlobalController.value!.getUrl(), headers: ref.read(humHubProvider).customHeaders),
+          );
+        } else {
+          WebViewGlobalController.value!.reload();
+        }
+      },
+    );
     authBrowser = AuthInAppBrowser(
       manifest: manifest,
       concludeAuth: (URLRequest request) {
@@ -112,7 +124,7 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
             },
             onProgressChanged: _onProgressChanged,
             onLoadError: (InAppWebViewController controller, Uri? url, int code, String message) {
-              if (code == -1009) NoConnectionDialog.show(context);
+              if (code == -1009) ShowDialog.of(context).noInternetPopup();
             },
           ),
         ),
@@ -153,7 +165,6 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
       WebMessageListener(
         jsObjectName: "flutterChannel",
         onPostMessage: (inMessage, sourceOrigin, isMainFrame, replyProxy) async {
-          logInfo(inMessage);
           ChannelMessage message = ChannelMessage.fromJson(inMessage!);
           await _handleJSMessage(message, headlessWebView!);
         },
@@ -168,7 +179,7 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
   }
 
   URLRequest get _initRequest {
-    final args = ModalRoute.of(context)!.settings.arguments;
+    final args = ModalRoute.of(context)?.settings.arguments;
     String? url;
     if (args is Manifest) {
       manifest = args;
@@ -181,11 +192,6 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
     }
     if (args == null) {
       manifest = m.MyRouter.initParams;
-    }
-    if (args is ManifestWithRemoteMsg) {
-      ManifestWithRemoteMsg manifestPush = args;
-      manifest = manifestPush.manifest;
-      url = manifestPush.remoteMessage.data['url'];
     }
     String? payloadFromPush = InitFromPush.usePayload();
     if (payloadFromPush != null) url = payloadFromPush;
@@ -211,58 +217,9 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
     }
   }
 
-  PullToRefreshController? get initPullToRefreshController {
-    _pullToRefreshOptions = PullToRefreshOptions(
-      color: HexColor(manifest.themeColor),
-    );
-    return kIsWeb
-        ? null
-        : PullToRefreshController(
-            options: _pullToRefreshOptions,
-            onRefresh: () async {
-              Uri? url = await WebViewGlobalController.value!.getUrl();
-              if (url != null) {
-                WebViewGlobalController.value!.loadUrl(
-                  urlRequest: URLRequest(
-                      url: await WebViewGlobalController.value!.getUrl(),
-                      headers: ref.read(humHubProvider).customHeaders),
-                );
-              } else {
-                WebViewGlobalController.value!.reload();
-              }
-            },
-          );
-  }
-
-  askForNotificationPermissions() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.notification_permission_popup_title),
-        content: Text(AppLocalizations.of(context)!.notification_permission_popup_content),
-        actions: <Widget>[
-          TextButton(
-            child: Text(AppLocalizations.of(context)!.enable),
-            onPressed: () {
-              AppSettings.openAppSettings();
-              Navigator.pop(context);
-            },
-          ),
-          TextButton(
-            child: Text(AppLocalizations.of(context)!.skip),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _setAjaxHeadersJQuery(InAppWebViewController controller) async {
     String jsCode = "\$.ajaxSetup({headers: ${jsonEncode(ref.read(humHubProvider).customHeaders).toString()}});";
-    dynamic jsResponse = await controller.evaluateJavascript(source: jsCode);
-    logInfo(jsResponse != null ? jsResponse.toString() : "Script returned null value");
+    await controller.evaluateJavascript(source: jsCode);
   }
 
   Future<void> _handleJSMessage(ChannelMessage message, HeadlessInAppWebView headlessWebView) async {
@@ -281,13 +238,14 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
         String? token = ref.read(pushTokenProvider).value;
         if (token != null) {
           var postData = Uint8List.fromList(utf8.encode("token=$token"));
-          URLRequest request = URLRequest(url: Uri.parse(message.url!), method: "POST", body: postData);
-          await headlessWebView.webViewController.loadUrl(urlRequest: request);
+          await headlessWebView.webViewController.postUrl(url: Uri.parse(message.url!), postData: postData);
         }
         var status = await Permission.notification.status;
         // status.isDenied: The user has previously denied the notification permission
         // !status.isGranted: The user has never been asked for the notification permission
-        if (status.isDenied || !status.isGranted) askForNotificationPermissions();
+        bool wasAskedBefore = await NotificationPlugin.hasAskedPermissionBefore();
+        // ignore: use_build_context_synchronously
+        if (status != PermissionStatus.granted && !wasAskedBefore) ShowDialog.of(context).notificationPermission();
         break;
       case ChannelAction.updateNotificationCount:
         if (message.count != null) FlutterAppBadger.updateBadgeCount(message.count!);
@@ -301,7 +259,7 @@ class WebViewAppState extends ConsumerState<WebViewApp> {
           await headlessWebView.webViewController.loadUrl(urlRequest: request);
         }
         break;
-      case ChannelAction.none:
+      default:
         break;
     }
   }

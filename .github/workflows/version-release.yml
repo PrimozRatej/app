@@ -28,10 +28,26 @@ jobs:
   build_android:
     name: Build APK
     needs: [version]
+    environment: ${{ matrix.flavor }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
+      - name: Check if secret exists
+        run: |
+          if [[ -n "${{ secrets.MY_SECRET }}" ]]; then
+            echo "Secret exists."
+            echo ${{ secrets.MY_SECRET }}
+          else
+            echo "Secret does not exist."
+          fi
+      - name: Check the flavor prop of matrix
+        run: echo ${{ matrix.flavor }}
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -130,6 +146,10 @@ jobs:
     runs-on: macos-13
     permissions:
       contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [ humhubCommunity, opener, somedemoproject12345 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3

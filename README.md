@@ -1,1 +1,1 @@
-# HumHub Mobile App with conflict +1
+# HumHub Mobile App

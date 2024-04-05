@@ -9,6 +9,7 @@ import 'package:loggy/loggy.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 extension MyWebViewController on InAppWebViewController {
+
   Future<bool> exitApp(context, ref) async {
     bool canGoBack = await this.canGoBack();
     if (canGoBack) {
@@ -81,6 +82,38 @@ extension FutureAsyncValueX<T> on Future<AsyncValue<T>> {
       );
 }
 
+extension IterableX<E> on Iterable<E> {
+  Iterable<T> mapIndexed<T>(T Function(E e, int i) f) {
+    var i = 0;
+    return map((e) => f(e, i++));
+  }
+
+  void forEachIndexed(void Function(E e, int i) f) {
+    var i = 0;
+    forEach((e) => f(e, i++));
+  }
+
+  Map<Y, List<E>> groupBy<Y>(Y Function(E e) fn) {
+    return Map.fromIterable(
+      map(fn).toSet(),
+      value: (i) => where((v) => fn(v) == i).toList(),
+    );
+  }
+
+  Iterable<E> distinctBy<Key>(Key Function(E element) by) {
+    final keys = <dynamic>{};
+    return where((item) {
+      final key = by(item);
+      if (!keys.contains(key)) {
+        keys.add(key);
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+}
+
 extension URLRequestExtension on URLRequest {
   URLRequest copyWith({
     Uri? url,
@@ -112,37 +145,5 @@ extension URLRequestExtension on URLRequest {
       iosTimeoutInterval: iosTimeoutInterval ?? this.iosTimeoutInterval,
       iosMainDocumentURL: iosMainDocumentURL ?? this.iosMainDocumentURL,
     );
-  }
-}
-
-extension IterableX<E> on Iterable<E> {
-  Iterable<T> mapIndexed<T>(T Function(E e, int i) f) {
-    var i = 0;
-    return map((e) => f(e, i++));
-  }
-
-  void forEachIndexed(void Function(E e, int i) f) {
-    var i = 0;
-    forEach((e) => f(e, i++));
-  }
-
-  Map<Y, List<E>> groupBy<Y>(Y Function(E e) fn) {
-    return Map.fromIterable(
-      map(fn).toSet(),
-      value: (i) => where((v) => fn(v) == i).toList(),
-    );
-  }
-
-  Iterable<E> distinctBy<Key>(Key Function(E element) by) {
-    final keys = <dynamic>{};
-    return where((item) {
-      final key = by(item);
-      if (!keys.contains(key)) {
-        keys.add(key);
-        return true;
-      } else {
-        return false;
-      }
-    });
   }
 }
