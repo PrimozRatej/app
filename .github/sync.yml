@@ -1,6 +1,6 @@
-PrimozRatej/app:
+PrimozRatej/app@master:
   - README.md
   - android/
-PrimozRatej/app-flavored:
+PrimozRatej/app-flavored@main:
   - README.md
   - android/
