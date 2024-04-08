@@ -1,0 +1,27 @@
+name: Sync Repo1 to Repo2
+
+on:
+  push:
+    branches:
+      - *  # Adjust the branch name as needed
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Filter files
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "actions@github.com"
+          git clone --mirror https://github.com/PrimozRatej/app.git filtered-repo
+          cd filtered-repo
+          # Filter out files/folders you want to exclude
+          # For example:
+          git filter-repo --invert-paths --path README.md --path .github
+          # Set up authentication for repo2 using PAT
+          git remote set-url origin https://username:${{ secrets.REPO2_TOKEN }}@github.com/PrimozRatej/app-flavored.git
+          git push --mirror origin
