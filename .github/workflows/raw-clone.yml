@@ -21,7 +21,11 @@ jobs:
           cd filtered-repo
           # Filter out files/folders you want to exclude
           # For example:
-          git filter-repo --invert-paths --path README.md --path .github
+          # git filter-repo --invert-paths --path README.md --path .github
+          EXCLUDE=("README.md" ".github")
+          for item in "${EXCLUDE[@]}"; do
+              git rm -r --cached "$item"
+          done
           # Set up authentication for repo2 using PAT
           git remote set-url origin https://username:${{ secrets.REPO2_TOKEN }}@github.com/PrimozRatej/app-flavored.git
           git push --mirror origin
