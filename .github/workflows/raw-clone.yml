@@ -26,6 +26,8 @@ jobs:
           # For example:
           # git filter-repo --invert-paths --path README.md --path .github
           ls
+          cd filtered-repo
+          ls
           EXCLUDE=("README.md" ".github")
           for item in "${EXCLUDE[@]}"; do
               git rm -r --cached "$item"
