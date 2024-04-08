@@ -19,6 +19,7 @@ jobs:
           git config --global user.email "actions@github.com"
           git clone --mirror https://github.com/PrimozRatej/app.git filtered-repo
           cd filtered-repo
+          cd HEAD
           ls
           # Filter out files/folders you want to exclude
           # For example:
