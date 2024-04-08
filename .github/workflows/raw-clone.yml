@@ -25,8 +25,12 @@ jobs:
           for item in "${EXCLUDE[@]}"; do
               git rm -r --cached "$item"
           done
-          # Set up authentication for repo2 using PAT
+      - name: Push changes to repo2
+        env:
+          REPO2_TOKEN: ${{ secrets.REPO2_TOKEN }}
+        run: |
           git remote set-url origin https://github.com/PrimozRatej/app-flavored.git
-          git config --global credential.helper store
-          echo "https://github.com/PrimozRatej:$(echo $REPO2_TOKEN)" > ~/.git-credentials
-          git push origin master
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git config credential.helper store <<<"https://PrimozRatej:${REPO2_TOKEN}@github.com"
+          git push origin main
