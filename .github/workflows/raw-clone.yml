@@ -29,4 +29,4 @@ jobs:
           git remote set-url origin https://github.com/PrimozRatej/app-flavored.git
           git config --global credential.helper store
           echo "https://github.com/PrimozRatej:$(echo $REPO2_TOKEN)" > ~/.git-credentials
-          git push origin main
+          git push origin master
