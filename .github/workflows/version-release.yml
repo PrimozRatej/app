@@ -1,256 +1,256 @@
-name: version-release
-
-on:
-  push:
-    tags:
-      - "v*"
-
-jobs:
-  version:
-    name: Create version number
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Extract version from tag name
-        id: extract_version
-        run: echo "version=$(echo ${{ github.ref }} | sed -e 's/^v//' -e 's/-.*//')" >> $GITHUB_ENV
-      - name: Write version to file
-        run: echo $version > version.txt
-      - name: Upload version.txt
-        uses: actions/upload-artifact@v3
-        with:
-          name: gitversion
-          path: version.txt
-
-  build_android:
-    name: Build APK
-    needs: [version]
-    environment: ${{ matrix.flavor }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        flavor: [ humhubCommunity, opener, somedemoproject12345 ]
-    steps:
-      - name: Check if secret exists
-        run: |
-          if [[ -n "${{ secrets.MY_SECRET }}" ]]; then
-            echo "Secret exists."
-            echo ${{ secrets.MY_SECRET }}
-          else
-            echo "Secret does not exist."
-          fi
-      - name: Check the flavor prop of matrix
-        run: echo ${{ matrix.flavor }}
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Extract version code
-        id: extract_version_code
-        run: echo "version_code=$(git rev-list --count HEAD)" >> $GITHUB_ENV
-      - name: Extract version
-        id: extract_version
-        run: echo "version=$(echo ${{ github.ref }} | sed -e 's/^refs\/tags\/v//' -e 's/-.*//')" >> $GITHUB_ENV
-      - name: Get version.txt
-        uses: actions/download-artifact@v3
-        with:
-          name: gitversion
-      - name: Create new file without newline char from version.txt
-        run: tr -d '\n' < version.txt > version1.txt
-      - name: Read version
-        id: version
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: version1.txt
-      - name: Update version in YAML
-        run: sed -i 's#99.99.99+99#refs/tags/${{ env.version }}+${{ env.version_code }}#g' pubspec.yaml
-      - name: Create key.properties file and write secrets to it
-        run: |
-          echo "storePassword=${{ secrets.PLAYSTORE_STORE_PASSWORD }}" > android/key.properties
-          echo "keyPassword=${{ secrets.PLAYSTORE_KEY_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=upload" >> android/key.properties
-          echo "storeFile=./keystore.jks" >> android/key.properties
-      - name: Convert base64 to keystore.jks
-        run: echo -n "${{ secrets.PLAYSTORE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.15
-        with:
-          versionSpec: "5.x"
-      - name: Use GitVersion
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.15
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.19.0'
-          channel: 'stable'
-      - uses: chkfung/android-version-actions@v1.2.1
-        with:
-          gradlePath: android/app/build.gradle # or app/build.gradle.kts
-          versionCode: ${{ env.version_code }}
-          versionName: ${{ env.version }}
-      - run: flutter clean
-      - run: flutter pub get
-      - run: flutter test
-      - run: flutter analyze --no-fatal-warnings --no-fatal-infos
-      - run: flutter build apk --release --split-per-abi --build-name="${{ env.version }}" --build-number=${{ env.version_code }}
-      - run: flutter build appbundle --release --build-name="${{ env.version }}" --build-number=${{ env.version_code }}
-      - name: Create a Release in GitHub
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/app/outputs/apk/release/*.apk,build/app/outputs/bundle/release/app-release.aab"
-          token: ${{ github.token }}
-          commit: ${{ github.sha }}
-          allowUpdates: true
-      - name: Upload app bundle
-        uses: actions/upload-artifact@v3
-        with:
-          name: appbundle
-          path: build/app/outputs/bundle/release/app-release.aab
-
-#  release_android:
-#    name: Release APK to Google Play
-#    needs: [build_android]
+#name: version-release
+#
+#on:
+#  push:
+#    tags:
+#      - "v*"
+#
+#jobs:
+#  version:
+#    name: Create version number
 #    runs-on: ubuntu-latest
 #    steps:
 #      - name: Checkout
 #        uses: actions/checkout@v3
 #        with:
 #          fetch-depth: 0
-#      - name: Get appbundle from artifacts
+#      - name: Extract version from tag name
+#        id: extract_version
+#        run: echo "version=$(echo ${{ github.ref }} | sed -e 's/^v//' -e 's/-.*//')" >> $GITHUB_ENV
+#      - name: Write version to file
+#        run: echo $version > version.txt
+#      - name: Upload version.txt
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: gitversion
+#          path: version.txt
+#
+#  build_android:
+#    name: Build APK
+#    needs: [version]
+#    environment: ${{ matrix.flavor }}
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: write
+#    continue-on-error: true
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        flavor: [ humhubCommunity, opener, somedemoproject12345 ]
+#    steps:
+#      - name: Check if secret exists
+#        run: |
+#          if [[ -n "${{ secrets.MY_SECRET }}" ]]; then
+#            echo "Secret exists."
+#            echo ${{ secrets.MY_SECRET }}
+#          else
+#            echo "Secret does not exist."
+#          fi
+#      - name: Check the flavor prop of matrix
+#        run: echo ${{ matrix.flavor }}
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          fetch-depth: 0
+#      - name: Extract version code
+#        id: extract_version_code
+#        run: echo "version_code=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+#      - name: Extract version
+#        id: extract_version
+#        run: echo "version=$(echo ${{ github.ref }} | sed -e 's/^refs\/tags\/v//' -e 's/-.*//')" >> $GITHUB_ENV
+#      - name: Get version.txt
 #        uses: actions/download-artifact@v3
 #        with:
-#          name: appbundle
-#      - name: Release app to internal track
-#        uses: r0adkll/upload-google-play@v1
+#          name: gitversion
+#      - name: Create new file without newline char from version.txt
+#        run: tr -d '\n' < version.txt > version1.txt
+#      - name: Read version
+#        id: version
+#        uses: juliangruber/read-file-action@v1
 #        with:
-#          serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_ACCOUNT_KEY }}
-#          packageName: com.humhub.app
-#          releaseFiles: app-release.aab
-#          track: internal
-#          status: completed
-
-  build_ios:
-    name: Build IPA
-    needs: [version]
-    runs-on: macos-13
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        flavor: [ humhubCommunity, opener, somedemoproject12345 ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install the Apple certificate and provisioning profile
-        env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-          KEYCHAIN_PASSWORD: ${{ secrets.APPSTORE_KEYCHAIN_PASSWORD }}
-        run: |
-          # create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          
-          # import certificate and provisioning profile from secrets
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-          
-          # create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          
-          # import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-          
-          # apply provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v1
-        with:
-          flutter-version: '3.19.0'
-          channel: 'stable'
-
-      - name: Install pub dependencies
-        run: flutter pub get
-
-      - name: Extract version
-        id: extract_version
-        run: echo "version=$(echo ${{ github.ref }} | sed -e 's/^refs\/tags\/v//' -e 's/-.*//')" >> $GITHUB_ENV
-
-      - name: Extract version code
-        id: extract_version_code
-        run: echo "version_code=$(git rev-list --count HEAD)" >> $GITHUB_ENV
-
-      - name: Update Info.plist version and build number
-        uses: damienaicheh/update-ios-version-info-plist-action@v1.0.0
-        with:
-          info-plist-path: 'ios/Runner/Info.plist'
-          bundle-short-version-string: '${{ env.version }}'
-          bundle-version: ${{ env.version_code }}
-          print-file: true
-
-      - name: Build IPA
-        run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist
-
-      - name: Create release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/ios/ipa/*.ipa"
-          token: ${{ github.token }}
-          commit: ${{ github.sha }}
-          allowUpdates: true
-
-      - name: Collect IPA artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: releaseipa
-          path: build/ios/ipa/*.ipa
-
-      # Important! Cleanup: remove the certificate and provisioning profile from the runner!
-      - name: Clean up keychain and provisioning profile
-        if: ${{ always() }}
-        run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
-
-#  release_ios:
-#    name: Release IPA to TestFlight
-#    needs: [ build_ios ]
-#    runs-on: macos-latest
+#          path: version1.txt
+#      - name: Update version in YAML
+#        run: sed -i 's#99.99.99+99#refs/tags/${{ env.version }}+${{ env.version_code }}#g' pubspec.yaml
+#      - name: Create key.properties file and write secrets to it
+#        run: |
+#          echo "storePassword=${{ secrets.PLAYSTORE_STORE_PASSWORD }}" > android/key.properties
+#          echo "keyPassword=${{ secrets.PLAYSTORE_KEY_PASSWORD }}" >> android/key.properties
+#          echo "keyAlias=upload" >> android/key.properties
+#          echo "storeFile=./keystore.jks" >> android/key.properties
+#      - name: Convert base64 to keystore.jks
+#        run: echo -n "${{ secrets.PLAYSTORE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+#      - name: Install GitVersion
+#        uses: gittools/actions/gitversion/setup@v0.9.15
+#        with:
+#          versionSpec: "5.x"
+#      - name: Use GitVersion
+#        id: gitversion
+#        uses: gittools/actions/gitversion/execute@v0.9.15
+#      - uses: actions/setup-java@v3
+#        with:
+#          distribution: 'temurin'
+#          java-version: '17'
+#      - uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.19.0'
+#          channel: 'stable'
+#      - uses: chkfung/android-version-actions@v1.2.1
+#        with:
+#          gradlePath: android/app/build.gradle # or app/build.gradle.kts
+#          versionCode: ${{ env.version_code }}
+#          versionName: ${{ env.version }}
+#      - run: flutter clean
+#      - run: flutter pub get
+#      - run: flutter test
+#      - run: flutter analyze --no-fatal-warnings --no-fatal-infos
+#      - run: flutter build apk --release --split-per-abi --build-name="${{ env.version }}" --build-number=${{ env.version_code }}
+#      - run: flutter build appbundle --release --build-name="${{ env.version }}" --build-number=${{ env.version_code }}
+#      - name: Create a Release in GitHub
+#        uses: ncipollo/release-action@v1
+#        with:
+#          artifacts: "build/app/outputs/apk/release/*.apk,build/app/outputs/bundle/release/app-release.aab"
+#          token: ${{ github.token }}
+#          commit: ${{ github.sha }}
+#          allowUpdates: true
+#      - name: Upload app bundle
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: appbundle
+#          path: build/app/outputs/bundle/release/app-release.aab
+#
+##  release_android:
+##    name: Release APK to Google Play
+##    needs: [build_android]
+##    runs-on: ubuntu-latest
+##    steps:
+##      - name: Checkout
+##        uses: actions/checkout@v3
+##        with:
+##          fetch-depth: 0
+##      - name: Get appbundle from artifacts
+##        uses: actions/download-artifact@v3
+##        with:
+##          name: appbundle
+##      - name: Release app to internal track
+##        uses: r0adkll/upload-google-play@v1
+##        with:
+##          serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_ACCOUNT_KEY }}
+##          packageName: com.humhub.app
+##          releaseFiles: app-release.aab
+##          track: internal
+##          status: completed
+#
+#  build_ios:
+#    name: Build IPA
+#    needs: [version]
+#    runs-on: macos-13
+#    permissions:
+#      contents: write
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        flavor: [ humhubCommunity, opener, somedemoproject12345 ]
 #    steps:
 #      - name: Checkout
 #        uses: actions/checkout@v3
 #        with:
 #          fetch-depth: 0
-#      - name: Get IPA from artifacts
-#        uses: actions/download-artifact@v3
+#      - name: Install the Apple certificate and provisioning profile
+#        env:
+#          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+#          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+#          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+#          KEYCHAIN_PASSWORD: ${{ secrets.APPSTORE_KEYCHAIN_PASSWORD }}
+#        run: |
+#          # create variables
+#          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+#          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+#          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+#
+#          # import certificate and provisioning profile from secrets
+#          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+#          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+#
+#          # create temporary keychain
+#          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+#          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+#          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+#
+#          # import certificate to keychain
+#          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+#          security list-keychain -d user -s $KEYCHAIN_PATH
+#
+#          # apply provisioning profile
+#          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+#          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+#
+#      - name: Install Flutter
+#        uses: subosito/flutter-action@v1
+#        with:
+#          flutter-version: '3.19.0'
+#          channel: 'stable'
+#
+#      - name: Install pub dependencies
+#        run: flutter pub get
+#
+#      - name: Extract version
+#        id: extract_version
+#        run: echo "version=$(echo ${{ github.ref }} | sed -e 's/^refs\/tags\/v//' -e 's/-.*//')" >> $GITHUB_ENV
+#
+#      - name: Extract version code
+#        id: extract_version_code
+#        run: echo "version_code=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+#
+#      - name: Update Info.plist version and build number
+#        uses: damienaicheh/update-ios-version-info-plist-action@v1.0.0
+#        with:
+#          info-plist-path: 'ios/Runner/Info.plist'
+#          bundle-short-version-string: '${{ env.version }}'
+#          bundle-version: ${{ env.version_code }}
+#          print-file: true
+#
+#      - name: Build IPA
+#        run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist
+#
+#      - name: Create release
+#        uses: ncipollo/release-action@v1
+#        with:
+#          artifacts: "build/ios/ipa/*.ipa"
+#          token: ${{ github.token }}
+#          commit: ${{ github.sha }}
+#          allowUpdates: true
+#
+#      - name: Collect IPA artifacts
+#        uses: actions/upload-artifact@v2
 #        with:
 #          name: releaseipa
-#          path: build/ios/ipa
-#      - name: Upload app to TestFlight
-#        uses: apple-actions/upload-testflight-build@v1
-#        with:
-#          app-path: build/ios/ipa/humhub.ipa
-#          issuer-id: ${{ secrets.APPSTORE_APP_API_ISSUER_ID }}
-#          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-#          api-private-key: ${{ secrets.APPSTORE_APP_API_PRIVATE_KEY }}
+#          path: build/ios/ipa/*.ipa
+#
+#      # Important! Cleanup: remove the certificate and provisioning profile from the runner!
+#      - name: Clean up keychain and provisioning profile
+#        if: ${{ always() }}
+#        run: |
+#          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+#          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+#
+##  release_ios:
+##    name: Release IPA to TestFlight
+##    needs: [ build_ios ]
+##    runs-on: macos-latest
+##    steps:
+##      - name: Checkout
+##        uses: actions/checkout@v3
+##        with:
+##          fetch-depth: 0
+##      - name: Get IPA from artifacts
+##        uses: actions/download-artifact@v3
+##        with:
+##          name: releaseipa
+##          path: build/ios/ipa
+##      - name: Upload app to TestFlight
+##        uses: apple-actions/upload-testflight-build@v1
+##        with:
+##          app-path: build/ios/ipa/humhub.ipa
+##          issuer-id: ${{ secrets.APPSTORE_APP_API_ISSUER_ID }}
+##          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+##          api-private-key: ${{ secrets.APPSTORE_APP_API_PRIVATE_KEY }}
