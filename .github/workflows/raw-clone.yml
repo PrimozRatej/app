@@ -26,5 +26,7 @@ jobs:
               git rm -r --cached "$item"
           done
           # Set up authentication for repo2 using PAT
-          git remote set-url origin https://username:${{ secrets.REPO2_TOKEN }}@github.com/PrimozRatej/app-flavored.git
-          git push --mirror origin
+          git remote set-url origin https://github.com/PrimozRatej/app-flavored.git
+          git config --global credential.helper store
+          echo "https://github.com/PrimozRatej:$(echo $REPO2_TOKEN)" > ~/.git-credentials
+          git push origin main
