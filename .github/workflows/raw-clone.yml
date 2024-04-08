@@ -22,7 +22,7 @@ jobs:
           # Filter out files/folders you want to exclude
           # For example:
           # git filter-repo --invert-paths --path README.md --path .github
-          EXCLUDE=("README.md" ".github")
+          EXCLUDE=("app/README.md" "app/.github")
           for item in "${EXCLUDE[@]}"; do
               git rm -r --cached "$item"
           done
