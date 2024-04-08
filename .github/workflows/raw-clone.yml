@@ -3,7 +3,7 @@ name: Sync Repo1 to Repo2
 on:
   push:
     branches:
-      - *  # Adjust the branch name as needed
+      - master  # Adjust the branch name as needed
 
 jobs:
   sync:
